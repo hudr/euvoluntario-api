@@ -18,7 +18,9 @@ usersRouter.post(
       address: Joi.string().required(),
       phone: Joi.string().required(),
       role: Joi.string().valid('entity', 'volunteer').required(),
-      cnpj: Joi.string().regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/),
+      cnpj: Joi.string().regex(
+        /^([0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}|[0-9]{2}\.?[0-9]{3}\.?[0-9]{3}\/?[0-9]{4}\-?[0-9]{2})$/
+      ),
     },
   }),
   UserController.store
