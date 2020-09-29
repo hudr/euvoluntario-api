@@ -9,7 +9,7 @@ usersRouter.get('/', authMiddleware, (req, res) => {
 })
 
 usersRouter.post(
-  '/register',
+  '/',
   celebrate({
     [Segments.BODY]: {
       name: Joi.string().required(),
@@ -25,7 +25,7 @@ usersRouter.post(
 )
 
 usersRouter.post(
-  '/',
+  '/session',
   celebrate({
     [Segments.BODY]: {
       email: Joi.string().email().required(),
