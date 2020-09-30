@@ -1,5 +1,6 @@
 require('dotenv/config')
 const Charity = require('../models/Charity')
+const User = require('../models/User')
 
 module.exports = {
   async index(req, res) {
@@ -19,6 +20,13 @@ module.exports = {
 
   async store(req, res) {
     try {
+      const isEntity = await User.findById(req.userId)
+
+      if (isEntity.role !== 'entity')
+        return res
+          .status(401)
+          .send({ error: 'Oops! Apenas entidades podem criar caridades' })
+
       const charity = await Charity.create({
         ...req.body,
         assignedTo: req.userId,
