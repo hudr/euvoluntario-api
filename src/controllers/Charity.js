@@ -141,7 +141,6 @@ module.exports = {
 
       return res.send({ charity })
     } catch (err) {
-      console.log(err)
       return res
         .status(400)
         .send({ error: 'Oops! Erro ao recusar voluntário(a)!' })

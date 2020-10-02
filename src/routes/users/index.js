@@ -26,6 +26,27 @@ usersRouter.post(
   UserController.store
 )
 
+usersRouter.put(
+  '/profile',
+  authMiddleware,
+  celebrate({
+    [Segments.BODY]: {
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      old_password: Joi.string(),
+      password: Joi.string(),
+      password_confirmation: Joi.string().valid(Joi.ref('password')),
+      address: Joi.string().required(),
+      phone: Joi.string().required(),
+      role: Joi.string().valid('entity', 'volunteer').required(),
+      cnpj: Joi.string().regex(
+        /^([0-9]{3}\.?[0-9]{3}\.?[0-9]{3}\-?[0-9]{2}|[0-9]{2}\.?[0-9]{3}\.?[0-9]{3}\/?[0-9]{4}\-?[0-9]{2})$/
+      ),
+    },
+  }),
+  UserController.update
+)
+
 usersRouter.post(
   '/session',
   celebrate({
