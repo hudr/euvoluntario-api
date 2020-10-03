@@ -1,8 +1,11 @@
 const express = require('express')
-const authMiddleware = require('../../middlewares/auth')
 const usersRouter = express.Router()
-const UserController = require('../../controllers/User')
 const { celebrate, Segments, Joi } = require('celebrate')
+const multer = require('multer')
+const authMiddleware = require('../../middlewares/auth')
+const UserController = require('../../controllers/User')
+const uploadConfig = require('../../config/upload')
+const upload = multer(uploadConfig.multer)
 
 usersRouter.get('/', authMiddleware, (req, res) => {
   res.status(200).send({ success: 'Usuário autenticado' })
@@ -45,6 +48,13 @@ usersRouter.put(
     },
   }),
   UserController.update
+)
+
+usersRouter.patch(
+  '/profile/avatar',
+  upload.single('avatar'),
+  authMiddleware,
+  UserController.upload
 )
 
 usersRouter.post(

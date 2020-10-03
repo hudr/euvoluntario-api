@@ -5,16 +5,31 @@ const User = require('../models/User')
 module.exports = {
   async index(req, res) {
     try {
-      const charities = await Charity.find().populate([
-        'assignedTo',
-        'volunteers.user',
-      ])
+      const charities = await Charity.find()
+        .populate(['assignedTo', 'volunteers.user'])
+        .sort({ createdAt: -1 })
 
       return res.send({ charities })
     } catch (err) {
       return res
         .status(400)
         .send({ error: 'Oops! Erro ao carregar eventos beneficentes!' })
+    }
+  },
+
+  async show(req, res) {
+    try {
+      const charity = await Charity.findById(req.params.charityId).populate([
+        'assignedTo',
+        'volunteers.user',
+      ])
+
+      if (!charity)
+        return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
+
+      return res.send({ charity })
+    } catch (err) {
+      return res.status(400).send({ error: 'Oops! Erro ao carregar evento!' })
     }
   },
 
@@ -35,22 +50,6 @@ module.exports = {
       return res.send({ charity })
     } catch (err) {
       res.status(400).send({ error: 'Oops! Erro ao criar evento beneficente!' })
-    }
-  },
-
-  async show(req, res) {
-    try {
-      const charity = await Charity.findById(req.params.charityId).populate([
-        'assignedTo',
-        'volunteers.user',
-      ])
-
-      if (!charity)
-        return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
-
-      return res.send({ charity })
-    } catch (err) {
-      return res.status(400).send({ error: 'Oops! Erro ao carregar evento!' })
     }
   },
 
@@ -170,7 +169,6 @@ module.exports = {
 
       return res.send({ charity })
     } catch (err) {
-      console.log(err)
       return res
         .status(400)
         .send({ error: 'Oops! Erro ao recusar voluntário(a)!' })

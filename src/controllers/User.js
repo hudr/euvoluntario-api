@@ -1,12 +1,12 @@
 require('dotenv/config')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
 const User = require('../models/User')
+const S3Provider = require('../providers/S3')
 
 function generateToken(params = {}) {
   return jwt.sign(params, process.env.APP_SECRET, {
-    expiresIn: 86400,
+    expiresIn: '1d',
   })
 }
 
@@ -101,6 +101,37 @@ module.exports = {
       res.send(data)
     } catch (err) {
       res.status(400).send({ error: 'Oops! A atualização de perfil falhou!' })
+    }
+  },
+
+  async upload(req, res) {
+    try {
+      const user = await User.findById(req.userId)
+
+      if (!user)
+        return res.status(401).send({
+          error: 'Apenas usuários autenticados podem alterar o avatar',
+        })
+
+      const destinyFolder = 'users'
+
+      const avatarFilename = req.file.filename
+
+      if (user.avatarUrl) {
+        await S3Provider.deleteFile(user.avatarUrl, destinyFolder)
+      }
+
+      const fileName = await S3Provider.saveFile(avatarFilename, destinyFolder)
+
+      user.avatarUrl = fileName
+
+      const data = await User.findByIdAndUpdate(req.userId, user, {
+        new: true,
+      })
+
+      res.send(data)
+    } catch (err) {
+      res.status(400).send({ error: 'Oops! Erro ao fazer upload de imagem' })
     }
   },
 
