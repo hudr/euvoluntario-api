@@ -58,6 +58,18 @@ usersRouter.patch(
 )
 
 usersRouter.post(
+  '/password/forgot',
+  celebrate({
+    [Segments.BODY]: {
+      email: Joi.string().email().required(),
+    },
+  }),
+  UserController.forgot
+)
+
+usersRouter.post('/password/reset', UserController.reset)
+
+usersRouter.post(
   '/session',
   celebrate({
     [Segments.BODY]: {

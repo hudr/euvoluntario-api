@@ -1,8 +1,12 @@
 require('dotenv/config')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const User = require('../models/User')
 const S3Provider = require('../providers/S3')
+const path = require('path')
+const dateFns = require('date-fns')
+const User = require('../models/User')
+const UserToken = require('../models/UserToken')
+const mailProvider = require('../providers/SES')
 
 function generateToken(params = {}) {
   return jwt.sign(params, process.env.APP_SECRET, {
@@ -132,6 +136,79 @@ module.exports = {
       res.send(data)
     } catch (err) {
       res.status(400).send({ error: 'Oops! Erro ao fazer upload de imagem' })
+    }
+  },
+
+  async forgot(req, res) {
+    try {
+      const { email } = req.body
+
+      const user = await User.findOne({ email })
+
+      if (!user) {
+        res.status(400).send({ error: 'Este usuário não existe' })
+      }
+
+      const { token } = await UserToken.create({ user_id: user._id })
+
+      const forgotPasswordTemplate = path.resolve(
+        __dirname,
+        '..',
+        'views',
+        'forgot_password.hbs'
+      )
+
+      await mailProvider.sendMail({
+        to: {
+          name: user.name,
+          email: user.email,
+        },
+        subject: '[Eu Voluntário] Recuperação de senha',
+        templateData: {
+          file: forgotPasswordTemplate,
+          variables: {
+            name: user.name,
+            link: `${process.env.APP_WEB_URL}/resetar-senha?token=${token}`,
+          },
+        },
+      })
+
+      res.status(204).send()
+    } catch (err) {
+      res.status(400).send({ error: 'Erro ao enviar e-mail' })
+    }
+  },
+
+  async reset(req, res) {
+    try {
+      const { token, password } = req.body
+
+      const userToken = await UserToken.findOne({ token })
+
+      if (!userToken) {
+        res.status(400).send({ error: 'O token não existe' })
+      }
+
+      const user = await User.findOne({ _id: userToken.user_id })
+
+      if (!user) {
+        res.status(400).send({ error: 'O token não existe para este usuário' })
+      }
+
+      const tokenCreatedAt = userToken.createdAt
+      const compareDate = dateFns.addHours(tokenCreatedAt, 2)
+
+      if (dateFns.isAfter(Date.now(), compareDate)) {
+        res.status(400).send({ error: 'Token expirado' })
+      }
+
+      user.password = await bcrypt.hash(password, 8)
+
+      await User.findOneAndUpdate(user)
+
+      res.status(204).send()
+    } catch (err) {
+      res.status(400).send({ error: 'Erro ao resetar senha' })
     }
   },
 
