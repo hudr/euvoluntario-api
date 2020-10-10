@@ -7,9 +7,7 @@ const UserController = require('../../controllers/User')
 const uploadConfig = require('../../config/upload')
 const upload = multer(uploadConfig.multer)
 
-usersRouter.get('/', authMiddleware, (req, res) => {
-  res.status(200).send({ success: 'Usuário autenticado' })
-})
+usersRouter.get('/', authMiddleware, UserController.index)
 
 usersRouter.post(
   '/',

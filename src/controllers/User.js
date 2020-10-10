@@ -15,6 +15,18 @@ function generateToken(params = {}) {
 }
 
 module.exports = {
+  async index(req, res) {
+    try {
+      const volunteers = await User.find().sort({ createdAt: -1 })
+
+      return res.send({ volunteers })
+    } catch (err) {
+      return res
+        .status(400)
+        .send({ error: 'Oops! Erro ao carregar voluntários!' })
+    }
+  },
+
   async store(req, res) {
     try {
       const { email, cnpj, role } = req.body
@@ -204,7 +216,7 @@ module.exports = {
 
       user.password = await bcrypt.hash(password, 8)
 
-      await User.findOneAndUpdate(user)
+      await User.findOneAndUpdate({ _id: userToken.user_id }, user)
 
       res.status(204).send()
     } catch (err) {
