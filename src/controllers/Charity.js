@@ -87,7 +87,7 @@ module.exports = {
         {
           new: true,
         }
-      )
+      ).populate(['assignedTo', 'volunteers.user'])
 
       if (!charity)
         return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
@@ -106,7 +106,7 @@ module.exports = {
         {
           new: true,
         }
-      )
+      ).populate(['assignedTo', 'volunteers.user'])
 
       if (!charity)
         return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
@@ -126,12 +126,12 @@ module.exports = {
           arrayFilters: [{ 'request._id': req.body.subscribeId }],
           new: true,
         }
-      )
+      ).populate(['assignedTo', 'volunteers.user'])
 
       if (!charity)
         return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
 
-      const isOwner = req.userId === charity.assignedTo
+      const isOwner = req.userId === charity.assignedTo._id
 
       if (!isOwner)
         return res
@@ -155,12 +155,12 @@ module.exports = {
           arrayFilters: [{ 'request._id': req.body.subscribeId }],
           new: true,
         }
-      )
+      ).populate(['assignedTo', 'volunteers.user'])
 
       if (!charity)
         return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
 
-      const isOwner = req.userId === charity.assignedTo
+      const isOwner = req.userId === charity.assignedTo._id
 
       if (!isOwner)
         return res
