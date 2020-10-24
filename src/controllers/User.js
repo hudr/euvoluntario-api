@@ -5,7 +5,9 @@ const S3Provider = require('../providers/S3')
 const path = require('path')
 const dateFns = require('date-fns')
 const User = require('../models/User')
+const Charity = require('../models/Charity')
 const UserToken = require('../models/UserToken')
+const UserNotification = require('../models/UserNotification')
 const mailProvider = require('../providers/SES')
 
 function generateToken(params = {}) {
@@ -240,5 +242,54 @@ module.exports = {
     user.password = undefined
 
     res.send({ user, token: generateToken({ id: user.id }) })
+  },
+
+  async notifications(req, res) {
+    try {
+      const notifications = await UserNotification.find({ user_id: req.userId }).sort({ createdAt: -1 })
+
+      return res.send({ notifications })
+    } catch (err) {
+      return res
+        .status(400)
+        .send({ error: 'Oops! Erro ao carregar notificações!' })
+    }
+  },
+
+  async notify(req, res) {
+    try {
+
+      const { user_id, charity_id, message, status } = req.body
+
+      const volunteer = await User.findOne({ _id: user_id })
+
+      if (!volunteer) {
+        return res.status(400).send({ error: 'Voluntário não encontrado!' })
+      }
+
+      const entity = await User.findOne({ _id: req.userId })
+
+      if (!entity) {
+        return res.status(400).send({ error: 'Entidade não encontrada!' })
+      }
+
+      const charity = await Charity.findOne({ _id: charity_id })
+
+      if (!charity) {
+        return res.status(400).send({ error: 'Caridade não encontrada!' })
+      }
+
+      await UserNotification.create({
+        sender: entity.name,
+        charityName: charity.title,
+        message,
+        status,
+        user_id: volunteer._id
+      })
+
+      res.status(204).send()
+    } catch (err) {
+      res.status(400).send({ error: 'Erro ao criar notificação' })
+    }
   },
 }

@@ -67,6 +67,22 @@ usersRouter.post(
 
 usersRouter.post('/password/reset', UserController.reset)
 
+usersRouter.get('/notifications', authMiddleware, UserController.notifications)
+
+usersRouter.post(
+  '/notification',
+  authMiddleware,
+  celebrate({
+    [Segments.BODY]: {
+      message: Joi.string(),
+      status: Joi.string().required(),
+      user_id: Joi.string().guid({ version: 'uuidv4' }).required(),
+      charity_id: Joi.string().guid({ version: 'uuidv4' }).required(),
+    },
+  }),
+  UserController.notify
+)
+
 usersRouter.post(
   '/session',
   celebrate({
