@@ -9,6 +9,11 @@ const CharityScheema = new mongoose.Schema(
       require: true,
     },
 
+    helpedPeople: {
+      type: Number,
+      required: true,
+    },
+
     description: {
       type: String,
       required: true,

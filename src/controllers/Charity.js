@@ -35,6 +35,8 @@ module.exports = {
 
   async store(req, res) {
     try {
+      const { title, helpedPeople, description, address, date } = req.body
+
       const isEntity = await User.findById(req.userId)
 
       if (isEntity.role !== 'entity')
@@ -43,7 +45,11 @@ module.exports = {
           .send({ error: 'Oops! Apenas entidades podem criar caridades' })
 
       const charity = await Charity.create({
-        ...req.body,
+        title,
+        helpedPeople: parseInt(helpedPeople),
+        description,
+        address,
+        date,
         assignedTo: req.userId,
       })
 

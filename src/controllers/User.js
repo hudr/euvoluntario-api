@@ -31,7 +31,7 @@ module.exports = {
 
   async store(req, res) {
     try {
-      const { email, cnpj, role } = req.body
+      const { email, cnpj, role, qualities } = req.body
 
       if (cnpj && (await User.findOne({ cnpj }))) {
         return res.status(400).send({ error: 'Entidade já cadastrada!' })
@@ -41,6 +41,12 @@ module.exports = {
         return res
           .status(400)
           .send({ error: 'Oops! Você não preencheu seu CNPJ!' })
+      }
+
+      if (role === 'volunteer' && !qualities.length) {
+        return res
+          .status(400)
+          .send({ error: 'Oops! Você não preencheu suas qualidades!' })
       }
 
       if (await User.findOne({ email })) {
@@ -68,6 +74,7 @@ module.exports = {
         address,
         cnpj,
         role,
+        qualities,
         password,
         old_password,
       } = req.body
@@ -111,6 +118,7 @@ module.exports = {
       user.address = address
       user.cnpj = cnpj
       user.role = role
+      user.qualities = qualities
 
       const data = await User.findByIdAndUpdate(req.userId, user, {
         new: true,

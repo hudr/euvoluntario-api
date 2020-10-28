@@ -45,6 +45,17 @@ const UserSchema = new mongoose.Schema(
       required: true,
     },
 
+    qualities: [
+      {
+        type: String,
+        default: null,
+        required: function () {
+          return this.role === 'volunteer'
+        },
+      },
+      
+    ],
+
     cnpj: {
       type: String,
       default: null,

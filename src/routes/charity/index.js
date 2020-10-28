@@ -23,6 +23,7 @@ charitiesRouter.post(
   celebrate({
     [Segments.BODY]: {
       title: Joi.string().required(),
+      helpedPeople: Joi.string().required(),
       description: Joi.string().required(),
       address: Joi.string().required(),
       date: Joi.date().required(),
