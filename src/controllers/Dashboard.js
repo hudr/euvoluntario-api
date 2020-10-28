@@ -4,7 +4,13 @@ const User = require('../models/User')
 module.exports = {
   async index(req, res) {
     try {
-      const usersCount = await User.countDocuments()
+      const volunteersCount = await User.countDocuments({
+        role: 'volunteer'
+      })
+
+      const entitiesCount = await User.countDocuments({
+        role: 'entity'
+      })
 
       const charitiesCount = await Charity.countDocuments()
 
@@ -21,7 +27,7 @@ module.exports = {
           $match: { completed: true }
         },
         {
-          $group :
+          $group:
             {
               _id : null,
               total: { $sum: "$helpedPeople" }
@@ -30,7 +36,7 @@ module.exports = {
         ]
       )
 
-      return res.send({ usersCount, charitiesCount, charitiesCompleted, charitiesInProgress, helpedPeople: helpedPeople[0] ? helpedPeople[0].total : 0 })
+      return res.send({ volunteersCount, entitiesCount, charitiesCount, charitiesCompleted, charitiesInProgress, helpedPeople: helpedPeople[0] ? helpedPeople[0].total : 0 })
     } catch (err) {
       return res
         .status(400)
