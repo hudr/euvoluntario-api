@@ -85,6 +85,12 @@ module.exports = {
         return res.status(400).send({ error: 'Usuário não encontrado' })
       }
 
+      if (user.role === 'volunteer' && !qualities.length) {
+        return res
+          .status(400)
+          .send({ error: 'Oops! Você não preencheu suas qualidades!' })
+      }
+
       const userWithUpdatedEmail = await User.findOne({ email })
 
       if (userWithUpdatedEmail && userWithUpdatedEmail._id !== req.userId) {
