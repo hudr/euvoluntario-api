@@ -4,6 +4,7 @@ const uuid = require('uuid')
 const CharityScheema = new mongoose.Schema(
   {
     _id: { type: String, default: uuid.v4 },
+
     title: {
       type: String,
       require: true,
@@ -12,6 +13,10 @@ const CharityScheema = new mongoose.Schema(
     helpedPeople: {
       type: Number,
       required: true,
+    },
+
+    picturesLink: {
+      type: String,
     },
 
     description: {

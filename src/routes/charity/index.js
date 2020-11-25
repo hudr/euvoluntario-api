@@ -104,4 +104,18 @@ charitiesRouter.delete(
   CharityController.delete
 )
 
+charitiesRouter.patch(
+  '/complete/:charityId',
+  authMiddleware,
+  celebrate({
+    [Segments.PARAMS]: {
+      charityId: Joi.string().guid({ version: 'uuidv4' }).required(),
+    },
+    [Segments.BODY]: {
+      message: Joi.string().required(),
+    },
+  }),
+  CharityController.complete
+)
+
 module.exports = charitiesRouter

@@ -1,6 +1,7 @@
 require('dotenv/config')
 const Charity = require('../models/Charity')
 const User = require('../models/User')
+const UserNotification = require('../models/UserNotification')
 
 module.exports = {
   async index(req, res) {
@@ -200,6 +201,49 @@ module.exports = {
       return res.send()
     } catch (err) {
       return res.status(400).send({ error: 'Oops! Erro ao deletar evento!' })
+    }
+  },
+
+  async complete(req, res) {
+    try {
+      
+      const volunteers = await Charity.findById({ _id: req.params.charityId }).populate('volunteers.user')
+
+      const approvedVolunteers = volunteers.volunteers.filter(volunteer => volunteer.approved === 'true')
+
+      const charity = await Charity.findOneAndUpdate(
+        { _id: req.params.charityId },
+        { $set: { 'completed': 'true', 'picturesLink': req.body.message } },
+        {
+          new: true,
+        }
+      ).populate(['assignedTo', 'volunteers.user'])
+
+      approvedVolunteers.map(volunteer => 
+        UserNotification.create({
+          sender: charity.assignedTo.name,
+          charityName: charity.title,
+          message: 'A iniciativa foi finalizada!',
+          status: 'Informativo',
+          user_id: volunteer.user._id
+        })
+      )
+
+      if (!charity)
+        return res.status(404).send({ error: 'Oops! Evento não encontrado!' })
+
+      const isOwner = req.userId === charity.assignedTo._id
+
+      if (!isOwner)
+        return res
+          .status(404)
+          .send({ error: 'Oops! Você não é o dono deste evento!' })
+
+      return res.send({ charity })
+    } catch (err) {
+      return res
+        .status(400)
+        .send({ error: 'Oops! Erro ao finalizar iniciativa' })
     }
   },
 }
